@@ -1,9 +1,12 @@
-h1(style="margin: 100px;font-size: 50px") Welcome to this nifty Koa server
-h2(style="margin: 0 100px;font-size: 40px") Try these routes:
-ul(style="margin: 0 100px;font-size: 30px; font-spacing: 5px")
-    li / (You're already here!')
-    li /name/[STRING] - returns "Hello [STRING]"
-    li /user/[INT]: 1 , 2, or 3 - returns a user.
-    li /[STRING]/[INT] - prints [STRING], [INT] times.
-    li /math/[INT]/[STRING]: + , - , * , or div /[INT] - math problem.  Ex: /math/2/+/2 retuns 4.
-    li /story - reads and displays a file.
+h1(style="margin: 100px;font-size: 50px") We have surveys!
+h2(style="margin: 0 100px;font-size: 40px") Plese choose a survey to see details
+ul(style="margin: 0 100px;font-size: 30px; font-spacing: 5px") Survey 1: #{name1}
+    li Participant count: #{participant_count1}
+    li Response Rate: #{response_rate1}%
+    li Submitted Responses: #{submitted_response_count1}
+
+ul(style="margin: 0 100px;font-size: 30px; font-spacing: 5px") Survey 2: #{name2}
+    li Participant count: #{participant_count2}
+    li Response Rate: #{response_rate2}%
+    li Submitted Responses: #{submitted_response_count2}
+  

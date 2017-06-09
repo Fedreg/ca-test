@@ -5,7 +5,6 @@ import fs from 'fs'
 import path from 'path'
 
 import * as funcs from './src/Utils/funcs'
-import * as users from './src/Controllers/user-controller.js'
 
 const koa = new Koa()
 const app = new Router()
@@ -17,48 +16,46 @@ app.use(Pug('server/src/Views'))
 Routes
 -------------------------------------*/
 
-// id : Int
-app.get('/server/user/:id', (ctx) => {
-    let par = ctx.params
-    users.getUser(par.id)
-    .then((user) => {
-        ctx.body = `name: ${user.name}\n sign: ${user.zodiac}\n id: ${user.id}`
-    })
-    .catch()
-})
-
-//read a file
+// Main survey result page
 app.get('/server/survey', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/index.json')
     let data = await funcs.readAndProcessData(dir, 'main')
     .then((result) => {
-        ctx.body = `${JSON.stringify(result)}` 
+        ctx.render('home', 
+            { name1: result[0].name,
+            participant_count1: result[0].participant_count,
+            response_rate1: (result[0].response_rate * 100).toFixed(0),
+            submitted_response_count1: result[0].submitted_response_count,
+            name2: result[1].name,
+            participant_count2: result[1].participant_count,
+            response_rate2: result[1].response_rate * 100,
+            submitted_response_count2: result[1].submitted_response_count
+        })
     })
     .catch()        
 })
 
+// Survey 1
 app.get('/server/survey/1', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/survey_results/1.json')
     await funcs.readAndProcessData(dir, '1')
     .then((result) => {
-        // processData.processSurvey1(result)
-        ctx.body = `${JSON.stringify(result)}` 
+        ctx.render('survey1',
+            {name: result.name,
+            questions: JSON.stringify(result.questions_description),
+            data: JSON.stringify(result)})
     })
     .catch()        
 })
 
+// Survey 2
 app.get('/server/survey/2', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/survey_results/2.json')
     let data = await funcs.readAndProcessData(dir, '2')
     .then((result) => {
-        ctx.body = `${JSON.stringify(result)}` 
+        ctx.render('survey2', {data: result})
     })
     .catch()        
-})
-
-// default route
-app.get('/server/', async (ctx) => {
-    ctx.render('home')
 })
 
 // 404
