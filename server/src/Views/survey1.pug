@@ -1,7 +1,7 @@
 h1(style="margin: 100px;font-size: 50px") survey 1
-ul(style="margin: 0 100px;font-size: 30px; font-spacing: 5px") Survey: #{name}
-    li Questions: #{questions}
-    //- li Response Rate: #{response_rate1}%
-    //- li Submitted Responses: #{submitted_response_count1}
-
-p #{data}
+ul(style="margin: 0 100px;font-size: 20px; font-spacing: 3px") Survey: #{data.name}
+    each val in data
+        div NAME: #{val.name}
+        div DESCRIPTION: #{val.description}
+        div SCORE: #{val.average}
+        br

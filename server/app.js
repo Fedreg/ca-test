@@ -40,10 +40,7 @@ app.get('/server/survey/1', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/survey_results/1.json')
     await funcs.readAndProcessData(dir, '1')
     .then((result) => {
-        ctx.render('survey1',
-            {name: result.name,
-            questions: JSON.stringify(result.questions_description),
-            data: JSON.stringify(result)})
+        ctx.render('survey1',{data: result})
     })
     .catch()        
 })
