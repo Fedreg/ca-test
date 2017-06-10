@@ -19,18 +19,35 @@ const surveyPath = (survey) => {
     }
 }
 
+
 // Removes extra decimal spaces and rounds number. 
 const numberFormatter = (num) => {
     if (String(num.toFixed(1)).slice(2) === "0") return String(num.toFixed(2).slice(0,1))
     else return String(num.toFixed(1))
 }
 
+// Determines which format data is returned in based on survey type.
+const prepareData = (result, index, arr, survey) => {
+    if (survey === 'main') return prepareTitleData(result)
+    else return prepareSurveyData(result, index, arr)
+}
 
-// Empty array which will hold the processed JSON data to send to the client.
-// let dataToDisplay = []
+const prepareTitleData = (result) =>{
+    let newData ={}
+    result.forEach((x) => {
+        console.log("X", x)
+        return 
+        { 
+            newData.name = x.name,
+            newData.description = String(x.participant_count),
+            newData.average = String((x.response_rate * 100).toFixed(0))
+        }
+    })
+    return newData
+}
 
 // Processes JS object into final format by calling itself recursively until all data is processed.
-const prepareData = (data, index, arr) => {
+const prepareSurveyData = (data, index, arr) => {
     let dataToDisplay = arr
     let query = (path) => pathOr('no data', path, data[index]) // Func to retrieve data from JSON.  Ramda.
     let questions = query(['questions'])
@@ -64,7 +81,7 @@ export function readAndProcessData(dir, survey) {
             let parsedData = JSON.parse(data)
             let getData = pathOr('data not found', surveyPath(survey))
             let result = getData(parsedData)
-            let finalResult = prepareData(result, 0, [])
+            let finalResult = prepareData(result, 0, [], survey)
             return resolve(finalResult)
         })
     })

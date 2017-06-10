@@ -1,19 +1,16 @@
--- Read more about this program in the official Elm guide:
--- https://guide.elm-lang.org/architecture/effects/http.html
-
-
 module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Json.Decode as Decode
+import Json.Decode as JD exposing (list, string)
+import Json.Decode.Pipeline as JDP
 
 
 main =
     Html.program
-        { init = init "survey/1"
+        { init = init
         , view = view
         , update = update
         , subscriptions = subscriptions
@@ -25,16 +22,24 @@ main =
 
 
 type alias Model =
-    { topic : String
-    , gifUrl : String
+    { survey : String
+    , retrievedData : List SurveyData
     }
 
 
-init : String -> ( Model, Cmd Msg )
-init topic =
-    ( Model topic "waiting.gif"
-    , getRandomGif topic
-    )
+type alias SurveyData =
+    { name : String
+    , description : String
+    , average : String
+    }
+
+
+init : ( Model, Cmd Msg )
+init =
+    { survey = "survey"
+    , retrievedData = [ { average = "", description = "", name = "" } ]
+    }
+        ! []
 
 
 
@@ -42,21 +47,31 @@ init topic =
 
 
 type Msg
-    = MorePlease
-    | NewGif (Result Http.Error String)
+    = ChangeSurveyView String
+    | DisplayData (List SurveyData)
+    | GetNewSurveyData (Result Http.Error (List SurveyData))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        MorePlease ->
-            ( model, getRandomGif model.topic )
+        ChangeSurveyView survey ->
+            ( { model | survey = survey }, getSurveyResults model.survey )
 
-        NewGif (Ok newUrl) ->
-            ( Model model.topic newUrl, Cmd.none )
+        DisplayData data ->
+            { model | retrievedData = data } ! []
 
-        NewGif (Err _) ->
-            ( model, Cmd.none )
+        --do a case statement to update view on survey change
+        -- ( model, getSurveyResults model.survey )
+        GetNewSurveyData (Ok data) ->
+            { model | retrievedData = data } ! []
+
+        GetNewSurveyData (Err err) ->
+            let
+                _ =
+                    Debug.log "error" (Err err)
+            in
+                ( model, Cmd.none )
 
 
 
@@ -65,11 +80,23 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    div [ style [ ( "backgroundColor", "#222" ) ] ]
+        [ h2 [] [ text model.survey ]
+        , button [ onClick <| ChangeSurveyView "survey" ] [ text "Main Survey" ]
+        , button [ onClick <| ChangeSurveyView "survey/1" ] [ text "Survey 1" ]
+        , button [ onClick <| ChangeSurveyView "survey/2" ] [ text "Survey 2" ]
+          -- , button [ onClick <| GetNewSurveyData (Ok model.retrievedData) ] [ text "Get Data" ]
+        , div []
+            (List.map surveyDiv model.retrievedData)
+        ]
+
+
+surveyDiv : SurveyData -> Html msg
+surveyDiv data =
     div []
-        [ h2 [] [ text model.topic ]
-        , button [ onClick MorePlease ] [ text "More Please!" ]
-        , br [] []
-        , img [ src model.gifUrl ] []
+        [ div [ style [ ( "color", "blue" ) ] ] [ text <| toString data.name ]
+        , div [ style [ ( "color", "deepPink" ) ] ] [ text <| toString data.description ]
+        , div [ style [ ( "color", "red" ), ( "marginBottom", "25px" ) ] ] [ text <| toString data.average ]
         ]
 
 
@@ -86,15 +113,32 @@ subscriptions model =
 -- HTTP
 
 
-getRandomGif : String -> Cmd Msg
-getRandomGif topic =
+getSurveyResults : String -> Cmd Msg
+getSurveyResults survey =
     let
         url =
-            "http://localhost:3501/server/" ++ topic
+            "http://localhost:3501/server/" ++ survey
+
+        request =
+            Http.get url surveyListDecoder
     in
-        Http.send NewGif (Http.get url decodeGifUrl)
+        Http.send GetNewSurveyData request
 
 
-decodeGifUrl : Decode.Decoder String
-decodeGifUrl =
-    Decode.at [ "data", "image_url" ] Decode.string
+
+-- decodeSurveyData : JD.Decoder String
+-- decodeSurveyData =
+--     JD.list
+
+
+surveyDecoder : JD.Decoder SurveyData
+surveyDecoder =
+    JDP.decode SurveyData
+        |> JDP.required "name" JD.string
+        |> JDP.required "description" JD.string
+        |> JDP.required "average" JD.string
+
+
+surveyListDecoder : JD.Decoder (List SurveyData)
+surveyListDecoder =
+    JD.list surveyDecoder

@@ -22,17 +22,8 @@ app.get('/server/survey', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/index.json')
     let data = await funcs.readAndProcessData(dir, 'main')
     .then((result) => {
-        // ctx.render('home', 
-        //     { name1: result[0].name,
-        //     participant_count1: result[0].participant_count,
-        //     response_rate1: (result[0].response_rate * 100).toFixed(0),
-        //     submitted_response_count1: result[0].submitted_response_count,
-        //     name2: result[1].name,
-        //     participant_count2: result[1].participant_count,
-        //     response_rate2: result[1].response_rate * 100,
-        //     submitted_response_count2: result[1].submitted_response_count
-        // })
-        ctx.body = `${result}`
+        console.log("Riza", result)
+        ctx.body = `${JSON.stringify(result)}`
     })
     .catch()        
 })
@@ -42,8 +33,7 @@ app.get('/server/survey/1', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/survey_results/1.json')
     await funcs.readAndProcessData(dir, '1')
     .then((result) => {
-        // ctx.render('survey1',{data: result}) Uncomment to render HTML
-        ctx.body = `${result}`
+        ctx.body = `${JSON.stringify(result)}`
     })
     .catch()        
 })
@@ -53,8 +43,7 @@ app.get('/server/survey/2', async (ctx) => {
     let dir = path.join(__dirname, 'src/DB/survey_results/2.json')
     let data = await funcs.readAndProcessData(dir, '2')
     .then((result) => {
-        // ctx.render('survey2', {data: result})
-        ctx.body = `${result}`
+        ctx.body = `${JSON.stringify(result)}`
     })
     .catch()        
 })
@@ -65,13 +54,17 @@ app.get('/server/*', async (ctx) => {
 })
 
 /*-------------------------------------
-Logger
+Send static assets
 -------------------------------------*/
 koa.use(async (ctx, next) => {
   if ('/' == ctx.path) 
   await send(ctx, '/client/static/Main.html')
   await next()
 })
+
+/*-------------------------------------
+Logger
+-------------------------------------*/
 
 koa.use(async function (ctx, next) {
     const start = new Date()
@@ -86,8 +79,6 @@ koa.use(async function (ctx, next) {
     const ms = new Date() - start
     console.log(`${ctx.method} ${ctx.url} - ${ms} ${ctx.status}`)
 })
-
-
 
 /*-------------------------------------
 Init
