@@ -4,6 +4,7 @@ import Pug from 'js-koa-pug'
 import fs from 'fs'
 import path from 'path'
 import send from 'koa-send'
+import serve from 'koa-static'
 
 import * as funcs from './server/Utils/funcs'
 
@@ -56,11 +57,14 @@ app.get('/server/*', async (ctx) => {
 /*-------------------------------------
 Send static assets
 -------------------------------------*/
-koa.use(async (ctx, next) => {
-  if ('/' == ctx.path) 
-  await send(ctx, '/client/static/Main.html')
-  await next()
-})
+koa.use(serve('./client/static/'))
+
+// koa.use(async (ctx, next) => {
+//   if ('/' == ctx.path) 
+//   await serve('./client/static/')
+// //   await send(ctx, 'client/static/Main.html')
+//   await next()
+// })
 
 /*-------------------------------------
 Logger
