@@ -19,7 +19,6 @@ const surveyPath = (survey) => {
     }
 }
 
-
 // Removes extra decimal spaces and rounds number. 
 const numberFormatter = (num) => {
     if (String(num.toFixed(1)).slice(2) === "0") return String(num.toFixed(2).slice(0,1))
@@ -28,22 +27,25 @@ const numberFormatter = (num) => {
 
 // Determines which format data is returned in based on survey type.
 const prepareData = (result, index, arr, survey) => {
-    if (survey === 'main') return prepareTitleData(result)
+    if (survey === 'main') return prepareTitleData(result, arr)
     else return prepareSurveyData(result, index, arr)
 }
 
-const prepareTitleData = (result) =>{
-    let newData ={}
+// Displays survey title information
+const prepareTitleData = (result, arr) =>{
+    let dataToDisplay = arr
     result.forEach((x) => {
-        console.log("X", x)
-        return 
-        { 
-            newData.name = x.name,
-            newData.description = String(x.participant_count),
-            newData.average = String((x.response_rate * 100).toFixed(0))
+        let name = x.name
+        let description = String(x.participant_count)
+        let average = String((x.response_rate * 100).toFixed(0))
+        let dataObj = { 
+            name:  name,
+            description: description,
+            average: average
         }
+        dataToDisplay.push(dataObj)
     })
-    return newData
+    return dataToDisplay
 }
 
 // Processes JS object into final format by calling itself recursively until all data is processed.
@@ -86,4 +88,3 @@ export function readAndProcessData(dir, survey) {
         })
     })
 }
-
