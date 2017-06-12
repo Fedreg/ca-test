@@ -65,6 +65,7 @@ initialSurvey =
 type Msg
     = ChangeSurveyView String
     | GetNewSurveyData (Result Http.Error (List SurveyData))
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,6 +101,9 @@ update msg model =
         GetNewSurveyData (Err err) ->
             ( model, Cmd.none )
 
+        NoOp ->
+            model ! []
+
 
 
 -- VIEW
@@ -115,6 +119,33 @@ view model =
         , div [ class "survey-group-container" ]
             (List.map surveyDiv (model.retrievedData |> dataToShow model.survey))
         ]
+
+
+{-| Renders HTML of each question, description, answer.
+-}
+surveyDiv : SurveyData -> Html Msg
+surveyDiv data =
+    let
+        survey =
+            if data.name == "Simple Survey" then
+                ChangeSurveyView "survey/1"
+            else if data.name == "Acme Engagement Survey" then
+                ChangeSurveyView "survey/2"
+            else
+                NoOp
+
+        margin =
+            if data.name == "Simple Survey" || data.name == "Acme Engagement Survey" then
+                "100px"
+            else
+                "15px"
+    in
+        div [ class "survey-results", onClick survey, style [ ( "marginTop", margin ) ] ]
+            [ div [ class "survey-results--name" ] [ text <| removeQuotes <| toString data.name ]
+            , div [ class "survey-results--description" ] [ text <| removeQuotes <| toString data.description ]
+            , div [ class "survey-results--average" ] [ text <| removeQuotes <| toString data.average ]
+            , ratingCircleGroup (removeQuotes <| toString data.average)
+            ]
 
 
 surveyTitle : String -> String
@@ -162,18 +193,6 @@ surveyButton a survey =
     div [ class "button--nav", onClick <| ChangeSurveyView survey ] [ text a.name ]
 
 
-{-| Renders HTML of each question, description, answer.
--}
-surveyDiv : SurveyData -> Html msg
-surveyDiv data =
-    div [ class "survey-results" ]
-        [ div [ class "survey-results--name" ] [ text <| removeQuotes <| toString data.name ]
-        , div [ class "survey-results--description" ] [ text <| removeQuotes <| toString data.description ]
-        , div [ class "survey-results--average" ] [ text <| removeQuotes <| toString data.average ]
-        , ratingCircleGroup (removeQuotes <| toString data.average)
-        ]
-
-
 {-| Removes quotes ("") from strings.
 -}
 removeQuotes : String -> String
@@ -206,12 +225,12 @@ ratingCircles : String -> Html msg
 ratingCircles num =
     div
         [ style
-            [ ( "height", "15px" )
-            , ( "width", "15px" )
-            , ( "margin", "5px" )
-            , ( "border", "1px solid #666" )
-            , ( "borderRadius", "8px" )
-            , ( "backgroundImage", "linear-gradient(90deg, red " ++ num ++ "%, rgba(0,0,0,0.25) " ++ num ++ "%)" )
+            [ ( "height", "10px" )
+            , ( "width", "10px" )
+            , ( "margin", "5px 1px" )
+            , ( "border", "1px solid #222" )
+            , ( "borderRadius", "5px" )
+            , ( "backgroundImage", "linear-gradient(90deg, red " ++ num ++ "%, rgba(0,0,0,0.75) " ++ num ++ "%)" )
             ]
         ]
         []
