@@ -23,7 +23,6 @@ app.get('/server/survey', async (ctx) => {
     let dir = path.join(__dirname, 'server/DB/index.json')
     let data = await funcs.readAndProcessData(dir, 'main')
     .then((result) => {
-        console.log("Riza", result)
         ctx.body = `${JSON.stringify(result)}`
     })
     .catch()        
@@ -58,13 +57,6 @@ app.get('/server/*', async (ctx) => {
 Send static assets
 -------------------------------------*/
 koa.use(serve('./client/static/'))
-
-// koa.use(async (ctx, next) => {
-//   if ('/' == ctx.path) 
-//   await serve('./client/static/')
-// //   await send(ctx, 'client/static/Main.html')
-//   await next()
-// })
 
 /*-------------------------------------
 Logger

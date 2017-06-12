@@ -40,8 +40,8 @@ const prepareTitleData = (result, arr) =>{
         let average = String((x.response_rate * 100).toFixed(0))
         let dataObj = { 
             name:  name,
-            description: description,
-            average: average
+            description: description + " participants",
+            average: "Response rate: "+ average + "%"
         }
         dataToDisplay.push(dataObj)
     })

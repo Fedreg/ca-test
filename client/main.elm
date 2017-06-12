@@ -6,8 +6,10 @@ import Html.Events exposing (..)
 import Http
 import Json.Decode as JD exposing (list, string)
 import Json.Decode.Pipeline as JDP
+import List.Extra exposing (last)
 
 
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -42,13 +44,18 @@ init : ( Model, Cmd Msg )
 init =
     ( { survey = "survey"
       , retrievedData =
-            { main = [ { average = "", description = "", name = "" } ]
-            , survey1 = [ { average = "", description = "", name = "" } ]
-            , survey2 = [ { average = "", description = "", name = "" } ]
+            { main = [ initialSurvey ]
+            , survey1 = [ initialSurvey ]
+            , survey2 = [ initialSurvey ]
             }
       }
     , getSurveyResults "survey"
     )
+
+
+initialSurvey : { average : String, description : String, name : String }
+initialSurvey =
+    { average = "", description = "", name = "" }
 
 
 
@@ -57,7 +64,6 @@ init =
 
 type Msg
     = ChangeSurveyView String
-      -- | DisplayData (List SurveyData)
     | GetNewSurveyData (Result Http.Error (List SurveyData))
 
 
@@ -65,19 +71,29 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChangeSurveyView survey ->
-            ( { model | survey = survey }, getSurveyResults survey )
+            if (model.retrievedData |> dataToShow survey) == [ initialSurvey ] then
+                ( { model | survey = survey }, getSurveyResults survey )
+            else
+                { model | survey = survey } ! []
 
-        -- DisplayData data ->
-        --     { model | retrievedData = data } ! []
-        --do a case statement to update view on survey change
-        -- ( model, getSurveyResults model.survey )
         GetNewSurveyData (Ok data) ->
             let
                 currentData =
                     model.retrievedData
 
                 newData =
-                    { currentData | main = data }
+                    case model.survey of
+                        "survey" ->
+                            { currentData | main = data }
+
+                        "survey/1" ->
+                            { currentData | survey1 = data }
+
+                        "survey/2" ->
+                            { currentData | survey2 = data }
+
+                        _ ->
+                            { currentData | main = data }
             in
                 { model | retrievedData = newData } ! []
 
@@ -91,36 +107,84 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "backgroundColor", "#222" ) ] ]
-        [ h2 [] [ text model.survey ]
-        , button [ onClick <| ChangeSurveyView "survey" ] [ text "Home" ]
-        , button [ onClick <| ChangeSurveyView "survey/1" ] [ text "Survey 1" ]
-        , button [ onClick <| ChangeSurveyView "survey/2" ] [ text "Survey 2" ]
-        , div [] [ text <| toString model.retrievedData ]
-        , div []
+    div []
+        [ h2 [ class "title" ] [ text <| surveyTitle model.survey ]
+        , div [ class "subtitle" ] [ text <| surveySubtitle model ]
+        , div [ class "button-group-container" ]
+            (List.map2 surveyButton model.retrievedData.main [ "survey/1", "survey/2" ])
+        , div [ class "survey-group-container" ]
             (List.map surveyDiv (model.retrievedData |> dataToShow model.survey))
         ]
 
 
+surveyTitle : String -> String
+surveyTitle survey =
+    case survey of
+        "survey/1" ->
+            "Simple Survey"
+
+        "survey/2" ->
+            "Acme Engagement Survey"
+
+        _ ->
+            "Select Survey"
+
+
+{-| Renders the participant count and response rate per survey.
+-}
+surveySubtitle : Model -> String
+surveySubtitle model =
+    let
+        data =
+            model.retrievedData.main
+
+        a =
+            Maybe.withDefault initialSurvey <| List.head data
+
+        b =
+            Maybe.withDefault initialSurvey <| last data
+    in
+        case model.survey of
+            "survey/1" ->
+                a.description ++ " : " ++ a.average
+
+            "survey/2" ->
+                b.description ++ " : " ++ b.average
+
+            _ ->
+                ""
+
+
+{-| Buttons
+-}
+surveyButton : { a | name : String } -> String -> Html Msg
+surveyButton a survey =
+    div [ class "button--nav", onClick <| ChangeSurveyView survey ] [ text a.name ]
+
+
+{-| Renders HTML of each question, description, answer.
+-}
 surveyDiv : SurveyData -> Html msg
 surveyDiv data =
-    div []
-        [ div [ style [ ( "color", "blue" ) ] ] [ text <| removeQuotes <| toString data.name ]
-        , div [ style [ ( "color", "deepPink" ) ] ] [ text <| removeQuotes <| toString data.description ]
-        , div [ style [ ( "color", "red" ), ( "marginBottom", "25px" ) ] ] [ text <| removeQuotes <| toString data.average ]
+    div [ class "survey-results" ]
+        [ div [ class "survey-results--name" ] [ text <| removeQuotes <| toString data.name ]
+        , div [ class "survey-results--description" ] [ text <| removeQuotes <| toString data.description ]
+        , div [ class "survey-results--average" ] [ text <| removeQuotes <| toString data.average ]
+        , ratingCircleGroup (removeQuotes <| toString data.average)
         ]
 
 
+{-| Removes quotes ("") from strings.
+-}
 removeQuotes : String -> String
 removeQuotes text =
     String.dropLeft 1 text
         |> String.dropRight 1
 
 
-
--- dataToShow : String -> String
-
-
+{-| Selects the data to display based on the survey selected.
+-}
+dataToShow : String -> { b | survey1 : a, survey2 : a, main : a } -> a
 dataToShow text =
     case text of
         "survey" ->
@@ -134,6 +198,59 @@ dataToShow text =
 
         _ ->
             .main
+
+
+{-| The circles that comprise the graphical rating score.
+-}
+ratingCircles : String -> Html msg
+ratingCircles num =
+    div
+        [ style
+            [ ( "height", "15px" )
+            , ( "width", "15px" )
+            , ( "margin", "5px" )
+            , ( "border", "1px solid #666" )
+            , ( "borderRadius", "8px" )
+            , ( "backgroundImage", "linear-gradient(90deg, red " ++ num ++ "%, rgba(0,0,0,0.25) " ++ num ++ "%)" )
+            ]
+        ]
+        []
+
+
+{-| Based on the score of each survey answer, this function "draws" the color in the rating circles
+-}
+ratingCircleGroup : String -> Html msg
+ratingCircleGroup num =
+    let
+        percent =
+            String.slice 2 3 num
+                |> String.toInt
+                |> Result.withDefault 0
+                |> (*) 10
+                |> toString
+
+        list =
+            case (String.slice 1 2 <| toString num) of
+                "1" ->
+                    [ "100", percent, "0", "0", "0" ]
+
+                "2" ->
+                    [ "100", "100", percent, "0", "0" ]
+
+                "3" ->
+                    [ "100", "100", "100", percent, "0" ]
+
+                "4" ->
+                    [ "100", "100", "100", "100", percent ]
+
+                "5" ->
+                    [ "100", "100", "100", "100", "100" ]
+
+                _ ->
+                    []
+    in
+        div [ class "rating-circles" ]
+            (List.map ratingCircles list)
 
 
 
