@@ -1,5 +1,5 @@
 body {
-    background-color: #222;
+    background-color: #000;
     display: flex; 
     flex-wrap: wrap;
     justify-content: center;
@@ -36,11 +36,10 @@ body {
     position: relative;
     margin: 15px;
     padding: 15px;
-    background-color: #333;
+    background-color: #000;
     width: 600px;
-    border: 1px solid #aaa;
-    border-radius: 5px;
-    box-shadow: 10px 10px 20px rgba(0,0,0,0.25);
+    border: 1px solid #333;
+    border-radius: 10px;
 }
 
 .survey-results--name {
@@ -59,25 +58,25 @@ body {
     bottom: 10px;
     left: 15px;
     font-size: 24px;
-    color: red;
+    color: #03a9f4;
 }
 
 .button--nav {
     margin: 15px;
     width: 225px;
     height: 40px;
-    background-color: #222;
-    border: 1px solid #999;
+    background-color: #111;
+    border: 1px solid #333;
     border-radius: 5px;
     font-size: 16px;
     line-height: 40px;
     text-align: center;
-    color: #ccc;
+    color: #ddd;
     cursor: pointer;
 }
 
 .button--nav:hover {
-    color: red;
+    color: #03a9f4;
 }
 
 .rating-circles {

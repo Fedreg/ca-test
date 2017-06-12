@@ -230,7 +230,7 @@ ratingCircles num =
             , ( "margin", "5px 1px" )
             , ( "border", "1px solid #222" )
             , ( "borderRadius", "5px" )
-            , ( "backgroundImage", "linear-gradient(90deg, red " ++ num ++ "%, rgba(0,0,0,0.75) " ++ num ++ "%)" )
+            , ( "backgroundImage", "linear-gradient(90deg, #03a9f4 " ++ num ++ "%, #333 " ++ num ++ "%)" )
             ]
         ]
         []
