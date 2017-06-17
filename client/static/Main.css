@@ -77,6 +77,8 @@ body {
 
 .button--nav:hover {
     color: #03a9f4;
+    background-color: #222;
+    transition: all 0.2s
 }
 
 .rating-circles {
@@ -85,4 +87,19 @@ body {
     right: 0;
     display: flex;
     padding: 10px;
+}
+
+.loading {
+    text-align: center;
+    margin-top: 200px;
+}
+
+@media only screen and (max-width: 770px) {
+    .button-group-container {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        align-items: center;
+        margin-left: 25px;
+    }
 }

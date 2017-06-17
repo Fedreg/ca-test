@@ -3,7 +3,7 @@ import path from 'path'
 import {pathOr, map} from 'ramda'
 
 // Returns a path to be used by Ramda.pathOr to retrieve data.
-const surveyPath = (survey) => {
+export const surveyPath = (survey) => {
     switch (survey) {
         case "1" : 
             return ['survey_result_detail', 'themes'] 
@@ -20,19 +20,19 @@ const surveyPath = (survey) => {
 }
 
 // Removes extra decimal spaces and rounds number. 
-const numberFormatter = (num) => {
+export const numberFormatter = (num) => {
     if (String(num.toFixed(1)).slice(2) === "0") return String(num.toFixed(2).slice(0,1))
     else return String(num.toFixed(1))
 }
 
 // Determines which format data is returned in based on survey type.
-const prepareData = (result, index, arr, survey) => {
+export const prepareData = (result, index, arr, survey) => {
     if (survey === 'main') return prepareTitleData(result, arr)
     else return prepareSurveyData(result, index, arr)
 }
 
 // Displays survey title information
-const prepareTitleData = (result, arr) =>{
+export const prepareTitleData = (result, arr) =>{
     let dataToDisplay = arr
     result.forEach((x) => {
         let name = x.name
@@ -49,7 +49,7 @@ const prepareTitleData = (result, arr) =>{
 }
 
 // Processes JS object into final format by calling itself recursively until all data is processed.
-const prepareSurveyData = (data, index, arr) => {
+export const prepareSurveyData = (data, index, arr) => {
     let dataToDisplay = arr
     let query = (path) => pathOr('no data', path, data[index]) // Func to retrieve data from JSON.  Ramda.
     let questions = query(['questions'])
@@ -76,7 +76,7 @@ const prepareSurveyData = (data, index, arr) => {
 }
 
 // Reads in data, parses it into JS object, uses helper functions to prepare data for display, and sends to route middleware.
-export function readAndProcessData(dir, survey) {
+export const readAndProcessData = (dir, survey) => {
     return new Promise((resolve, reject) => {
         fs.readFile(dir, `utf-8`, (err, data) => {
             if (err) return reject(err)
@@ -88,3 +88,4 @@ export function readAndProcessData(dir, survey) {
         })
     })
 }
+

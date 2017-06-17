@@ -72,6 +72,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChangeSurveyView survey ->
+            -- If data already populated, no further requests will be made.
             if (model.retrievedData |> dataToShow survey) == [ initialSurvey ] then
                 ( { model | survey = survey }, getSurveyResults survey )
             else
@@ -82,6 +83,7 @@ update msg model =
                 currentData =
                     model.retrievedData
 
+                -- Determines which survey data to retrieve.
                 newData =
                     case model.survey of
                         "survey" ->
@@ -111,14 +113,23 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h2 [ class "title" ] [ text <| surveyTitle model.survey ]
-        , div [ class "subtitle" ] [ text <| surveySubtitle model ]
-        , div [ class "button-group-container" ]
-            (List.map2 surveyButton model.retrievedData.main [ "survey/1", "survey/2" ])
-        , div [ class "survey-group-container" ]
-            (List.map surveyDiv (model.retrievedData |> dataToShow model.survey))
-        ]
+    let
+        loadingIndicator =
+            -- Will display if data is loading.
+            if (model.retrievedData |> dataToShow model.survey) == [ initialSurvey ] then
+                h2 [ class "loading" ] [ text "Survey Results Loading ..." ]
+            else
+                div [] []
+    in
+        div []
+            [ h2 [ class "title" ] [ text <| surveyTitle model.survey ]
+            , div [ class "subtitle" ] [ text <| surveySubtitle model ]
+            , div [ class "button-group-container" ]
+                (List.map2 surveyButton model.retrievedData.main [ "survey/1", "survey/2" ])
+            , div [ class "survey-group-container" ]
+                (List.map surveyDiv (model.retrievedData |> dataToShow model.survey))
+            , loadingIndicator
+            ]
 
 
 {-| Renders HTML of each question, description, answer.
@@ -219,7 +230,7 @@ dataToShow text =
             .main
 
 
-{-| The circles that comprise the graphical rating score.
+{-| The circles that comprise the graphical rating score (use linear gradient percentage).
 -}
 ratingCircles : String -> Html msg
 ratingCircles num =

@@ -1,10 +1,13 @@
 {
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js --exec babel-node"
+    "start": "nodemon app.js --exec babel-node",
+    "test": "mocha --compilers js:babel-core/register --timeout 10000"
   },
   "dependencies": {
-    "koa": "^2.2.0"
+    "chai": "^4.0.2",
+    "koa": "^2.2.0",
+    "mocha": "^3.4.2"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
